@@ -1,21 +1,13 @@
 import React from 'react';
-import jwt from 'jwt-decode';
-import { useNavigate } from "react-router-dom";
-function ProfilePage() {
-    const token = localStorage.getItem('accessToken');
-    const isAuth = localStorage.getItem('isAuth');
-    const decodedtoken = jwt(token);
-    const navigate = useNavigate();
+import { useParams } from 'react-router-dom';
+import AudioPlayer from '../components/AudioPlayer';
 
-    const logout = () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('isAuth');
-        navigate('/', {replace: true});
-      };
-  return ( 
+function ProfilePage() {
+  const { id } = useParams();
+
+  return (
     <div>
-      { !isAuth ? navigate("/") : decodedtoken.name }
-      <button onClick={logout}>logout</button>
+      <AudioPlayer userId={id} />
     </div>
   );
 }

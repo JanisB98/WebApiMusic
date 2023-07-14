@@ -89,18 +89,15 @@ namespace MusicWebApi.Controllers
 
                 var folderPath = Path.Combine("ClientApp", "src", "music");
                 Directory.CreateDirectory(folderPath);
-          
-                string filePath = Path.Combine(folderPath, file.Title);
+
                 string dataBasePath = file.Title;
-                if (!Path.GetExtension(filePath).Equals(".mp3", StringComparison.OrdinalIgnoreCase))
-                {
-                    filePath = Path.ChangeExtension(filePath, ".mp3");  
-                }
 
                 if (!Path.GetExtension(file.Title).Equals(".mp3", StringComparison.OrdinalIgnoreCase))
                 {
                     dataBasePath = Path.ChangeExtension(file.Title, ".mp3");
                 }
+
+                string filePath = Path.Combine(folderPath, file.Title);
 
                 if (!_musicRepository.CreateMusic(file.Title.Replace(".mp3", ""), dataBasePath))
                 {

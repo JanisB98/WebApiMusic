@@ -1,0 +1,25 @@
+.users-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .users-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .user-item {
+    margin-bottom: 10px;
+  }
+  
+  .user-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .user-link:hover {
+    text-decoration: underline;
+  }
+  

@@ -30,4 +30,32 @@
   .control-button {
     margin: 0 5px;
   }
+
+  .control-button-img {
+    width: 20px;
+    height: 20px;
+    margin: 0 5px;
+  }
+  
+  .small-audio-player.active{
+    font-weight: bold;
+    background-color: rgb(255, 255, 255);
+  }
+
+  .small-audio-player {
+    display: flex;
+    align-items: center;
+  }
+  
+  .control-button {
+    margin-right: 10px;
+  }
+  
+  .song-title-small {
+    font-size: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   

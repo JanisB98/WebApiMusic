@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 function AuthForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -44,7 +45,7 @@ function AuthForm() {
           data.then((e) => {
             localStorage.setItem('accessToken', e);
             localStorage.setItem('isAuth', JSON.stringify(true));
-            navigate("/profile", {replace: true});
+            navigate("/home", {replace: true});
           });
           console.log('Request successful');
         }

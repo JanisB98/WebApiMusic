@@ -31,6 +31,10 @@ namespace MusicWebApi.Repository
         }
         public bool CreateMusic(string titel, string path)
         {
+            if(MusicExists(titel))
+            {
+                return true;
+            }
             var music = new Music()
             {
                 Title = titel,

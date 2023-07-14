@@ -7,6 +7,9 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import './css/AudioPlayer.css';
 import './css/AuthForm.css';
+import './css/Upload.css';
+import './css/UsersProfiles.css';
+import './css/Header.css'; 
 
 const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
 const rootElement = document.getElementById('root');

@@ -16,10 +16,7 @@ namespace MusicWebApi.Repository
 
         public ICollection<User> GetUsers()
         {
-            return _context.Users
-                .Include(u => u.UserMusics)
-                .ThenInclude(um => um.Music)
-                .ToList();
+            return _context.Users.ToList();
         }
         public User GetUser(string email)
         {

@@ -1,21 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import jwt from 'jwt-decode';
+import playImage from '../img/play.svg';
+import pauseImage from '../img/pause.svg';
+import stopImage from '../img/stop.svg';
+import nextImage from '../img/next.svg';
+import prevImage from '../img/prev.svg';
+import replayImage from '../img/replay.svg';
+import replayImage1 from '../img/replay1.svg';
+import Header from '../components/Header';
 
-function formatTime(timeInSeconds) {
-  const minutes = Math.floor(timeInSeconds / 60);
-  const seconds = Math.floor(timeInSeconds % 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function AudioPlayer() {
+function AudioPlayer(props) {
   const [audioFiles, setAudioFiles] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeAudio, setActiveAudio] = useState(null);
   const [isPaused, setPause] = useState(true);
+  const [isReplay, setReplay] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
-  const [volume, setVolume] = useState(0.5); // Default volume level
+  const [volume, setVolume] = useState(0.8); // Default volume level
+  const { userId } = props;
   const token = localStorage.getItem('accessToken');
   const decodedtoken = jwt(token);
 
@@ -25,19 +29,27 @@ function AudioPlayer() {
 
   useEffect(() => {
     if (activeAudio) {
-      activeAudio.addEventListener('ended', handleNext);
+      activeAudio.addEventListener('ended', handleEnded);
     }
-
+  
     return () => {
       if (activeAudio) {
-        activeAudio.removeEventListener('ended', handleNext);
+        activeAudio.removeEventListener('ended', handleEnded);
       }
     };
-  }, [activeAudio]);
+  }, [activeAudio, isReplay]);
+
+  const formatTime = useMemo(() => {
+    return (timeInSeconds) => {
+      const minutes = Math.floor(timeInSeconds / 60);
+      const seconds = Math.floor(timeInSeconds % 60);
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+  }, []);
 
   const fetchAudioFiles = async () => {
     try {
-      const response = await fetch(`https://localhost:7104/api/music/${decodedtoken.id}`);
+      const response = await fetch(`https://localhost:7104/api/music/${userId ? userId : decodedtoken.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch audio files');
       }
@@ -82,9 +94,9 @@ function AudioPlayer() {
     }
   };
 
-  const handlePlay = () => {
-    if (activeAudio == null) {
-      handleStart(audioFiles[activeIndex].path, activeIndex);
+  const handlePlay = (index) => {
+    if (activeAudio === null || activeIndex !== index) {
+      handleStart(audioFiles[index].path, index);
     } else {
       activeAudio.pause();
       setPause(!isPaused);
@@ -93,7 +105,8 @@ function AudioPlayer() {
         setPause(false);
       }
     }
-  };
+  }
+
 
   const handleStop = () => {
     if (activeAudio) {
@@ -104,19 +117,31 @@ function AudioPlayer() {
     }
   };
 
+  const handleReplay = () =>{
+    setReplay(!isReplay);
+  }
+
+  const handleEnded = () => {
+    if (isReplay) {
+      handleStart(audioFiles[activeIndex].path, activeIndex);
+    } else {
+      handleNext();
+    }
+  };
+
   const handleNext = () => {
     handleStop();
 
-    // Increment the active index
-    let nextIndex = activeIndex + 1;
+  // Increment the active index
+  let nextIndex = activeIndex + 1;
 
-    // Check if the next index is within the audio files range
-    if (nextIndex >= audioFiles.length) {
-      nextIndex = 0; // Set the index to 0 to go back to the first audio file
-    }
+  // Check if the next index is within the audio files range
+  if (nextIndex >= audioFiles.length) {
+    nextIndex = 0; // Set the index to 0 to go back to the first audio file
+  }
 
-    const { path } = audioFiles[nextIndex];
-    handleStart(path, nextIndex);
+  const { path } = audioFiles[nextIndex];
+  handleStart(path, nextIndex);
   };
 
   const handlePrev = () => {
@@ -150,14 +175,11 @@ function AudioPlayer() {
     }
   };
 
-  const handleAudioClick = (index) => {
-    if (index !== activeIndex) {
-      const { path } = audioFiles[index];
-      handleStart(path, index);
-    }
-  };
+  
 
   return (
+    <div>
+    <Header/>
     <div className="audio-player">
       {audioFiles.length > 0 ? (
         <div>
@@ -188,43 +210,41 @@ function AudioPlayer() {
             />
           </div>
           <div className="controls">
-            <button className="control-button" onClick={handleStop}>
-              Stop
-            </button>
-            {isPaused ? (
-              <button className="control-button" onClick={handlePlay}>
-                Play
-              </button>
-            ) : (
-              <button className="control-button" onClick={handlePlay}>
-                Pause
-              </button>
-            )}
-            <button className="control-button" onClick={handlePrev}>
-              Prev
-            </button>
-            <button className="control-button" onClick={handleNext}>
-              Next
-            </button>
+            <div className="control-button" onClick={handleStop}>
+              <img className="control-button-img" src={stopImage} alt="Stop" />
+            </div>
+            <div className="control-button" onClick={() => handlePlay(activeIndex)}>
+              {isPaused ? 
+              <img className="control-button-img" src={playImage} alt="Play" /> : 
+              <img className="control-button-img" src={pauseImage} alt="Pause" />}
+            </div>
+            <div className="control-button" onClick={handlePrev}>
+              <img className="control-button-img" src={prevImage} alt="Prev" />
+            </div>
+            <div className="control-button" onClick={handleNext}>
+              <img className="control-button-img" src={nextImage} alt="Next" />
+            </div>
+            <div className="control-button" onClick={handleReplay}>
+              <img className="control-button-img" src={!isReplay ? replayImage : replayImage1} alt="Next" />
+            </div>
           </div>
-          <div className="audio-list">
-            <h3>Audio Files:</h3>
-            <ul>
-              {audioFiles.map((file, index) => (
-                <li
-                  key={file.id}
-                  onClick={() => handleAudioClick(index)}
-                  className={index === activeIndex ? 'active' : ''}
-                >
-                  {file.title}
-                </li>
-              ))}
-            </ul>
+
+          {audioFiles.map((audio, index) => (
+          <div key={index} className={`small-audio-player ${activeIndex === index ? 'active' : ''}`}>
+            <div className="control-button" onClick={() => handlePlay(index)}>
+              {activeIndex === index && !isPaused ? 
+              <img className="control-button-img" src={pauseImage} alt="Pause" /> : 
+              <img className="control-button-img" src={playImage} alt="Play" />}
+            </div>
+            <div className="song-title-small">{audio.title}</div> 
           </div>
+          ))}
+
         </div>
       ) : (
         <div>Loading...</div>
       )}
+    </div>
     </div>
   );
 }
