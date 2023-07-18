@@ -20,7 +20,7 @@ namespace MusicWebApi.Repository
         }
         public Music GetMusic(string title)
         {
-            return _context.Musics.Where(p => p.Title == title).FirstOrDefault();
+            return _context.Musics.Where(p => p.Title == title).OrderByDescending(m => m.Id).FirstOrDefault();
         }
         public List<UserMusic> GetMusicsByUser(int userId)
         {
@@ -31,10 +31,6 @@ namespace MusicWebApi.Repository
         }
         public bool CreateMusic(string titel, string path)
         {
-            if(MusicExists(titel))
-            {
-                return true;
-            }
             var music = new Music()
             {
                 Title = titel,
@@ -63,6 +59,32 @@ namespace MusicWebApi.Repository
             };
 
             _context.UserMusics.Add(userMusic);
+            return SaveMusic();
+        }
+
+        public bool DeleteMusic(int musicId)
+        {
+            var music = _context.Musics.FirstOrDefault(m => m.Id == musicId);
+
+            if (music == null)
+            {
+                return false;
+            }
+
+            _context.Musics.Remove(music);
+            return SaveMusic();
+        }
+
+        public bool DeleteUserMusic(int userId, int musicId)
+        {
+            var userMusic = _context.UserMusics.FirstOrDefault(um => um.UserId == userId && um.MusicId == musicId);
+
+            if (userMusic == null)
+            {
+                return false;
+            }
+
+            _context.UserMusics.Remove(userMusic);
             return SaveMusic();
         }
 

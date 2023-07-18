@@ -175,7 +175,53 @@ function AudioPlayer(props) {
     }
   };
 
-  
+  const handleDelete = (id) =>{
+    const userId = decodedtoken.id;
+    const musicId = id;
+
+    fetch(`https://localhost:7104/api/music/delete?userId=${userId}&musicId=${musicId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log('Music deleted successfully');
+        } else {
+          throw new Error('Failed to delete music');
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting music:', error);
+      });
+  }
+
+  const handleAdd = (id) =>{
+    if(!userId){
+      return;
+    }
+    const musicId = id;
+
+    fetch(`https://localhost:7104/api/music/addmusic?userId=${decodedtoken.id}&musicId=${musicId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log('Music added successfully');
+        } else {
+          throw new Error('Failed to add music');
+        }
+      })
+      .catch((error) => {
+        console.error('Error adding music:', error);
+      });
+  }
 
   return (
     <div>
@@ -228,18 +274,26 @@ function AudioPlayer(props) {
               <img className="control-button-img" src={!isReplay ? replayImage : replayImage1} alt="Next" />
             </div>
           </div>
-
           {audioFiles.map((audio, index) => (
-          <div key={index} className={`small-audio-player ${activeIndex === index ? 'active' : ''}`}>
-            <div className="control-button" onClick={() => handlePlay(index)}>
-              {activeIndex === index && !isPaused ? 
-              <img className="control-button-img" src={pauseImage} alt="Pause" /> : 
-              <img className="control-button-img" src={playImage} alt="Play" />}
+            <div key={index} className={`small-audio-player ${activeIndex === index ? 'active' : ''}`}>
+              <div className="play-title-warp">
+              <div className="control-button" onClick={() => handlePlay(index)}>
+                {activeIndex === index && !isPaused ? 
+                <img className="control-button-img" src={pauseImage} alt="Pause" /> : 
+                <img className="control-button-img" src={playImage} alt="Play" />}
+              </div>
+              <div className="song-title-small">{audio.title}</div> 
+              </div>
+              <div>
+                {!userId ? <></> : <button className="add-button" onClick={() => handleAdd(audio.id)}>
+                  Add 
+                </button>}
+                <button className="delete-button" onClick={() => handleDelete(audio.id)}>
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="song-title-small">{audio.title}</div> 
-          </div>
           ))}
-
         </div>
       ) : (
         <div>Loading...</div>

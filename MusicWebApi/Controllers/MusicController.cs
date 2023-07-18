@@ -90,14 +90,16 @@ namespace MusicWebApi.Controllers
                 var folderPath = Path.Combine("ClientApp", "src", "music");
                 Directory.CreateDirectory(folderPath);
 
-                string dataBasePath = file.Title;
+                
+                string formattedDateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
+                string storeTitle = Path.GetFileNameWithoutExtension(file.Title) + "_" + formattedDateTime;
+                string dataBasePath = storeTitle;
+                string filePath = Path.Combine(folderPath, storeTitle + ".mp3");
 
-                if (!Path.GetExtension(file.Title).Equals(".mp3", StringComparison.OrdinalIgnoreCase))
+                if (!Path.GetExtension(storeTitle).Equals(".mp3", StringComparison.OrdinalIgnoreCase))
                 {
-                    dataBasePath = Path.ChangeExtension(file.Title, ".mp3");
+                    dataBasePath = storeTitle + ".mp3";
                 }
-
-                string filePath = Path.Combine(folderPath, file.Title);
 
                 if (!_musicRepository.CreateMusic(file.Title.Replace(".mp3", ""), dataBasePath))
                 {
@@ -119,6 +121,46 @@ namespace MusicWebApi.Controllers
                     file.FormFile.CopyTo(stream);
                 }
                 return Ok();
+            }
+            catch (Exception)
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost("addmusic")]
+        [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult AddUserMusic(int userId, int musicId)
+        {
+            try
+            {
+                if (!_musicRepository.CreateUserMusic(userId, musicId))
+                {
+                    return StatusCode(500, ModelState);
+                }
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost("delete")]
+        [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult DeleteUserMusic(int userId, int musicId)
+        {
+            try
+            {
+               if(!_musicRepository.DeleteUserMusic(userId, musicId))
+                {
+                    return StatusCode(500, ModelState);
+                }
+               return Ok();
             }
             catch (Exception)
             {
